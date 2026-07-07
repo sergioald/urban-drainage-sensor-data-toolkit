@@ -1,4 +1,4 @@
-"""Create a public-safe synthetic monitoring-point map.
+"""Create a public-safe synthetic monitoring dashboard map.
 
 Run from the repository root:
 
@@ -35,11 +35,11 @@ def main() -> None:
     output_html = render_leaflet_map(
         points,
         output_dir / "synthetic_monitoring_points.html",
-        title="Synthetic urban drainage monitoring points",
+        title="Synthetic urban drainage monitoring dashboard",
     )
 
     print(f"Synthetic point table written to: {output_dir / 'synthetic_monitoring_points.csv'}")
-    print(f"Synthetic map written to: {output_html}")
+    print(f"Synthetic dashboard map written to: {output_html}")
 
 
 if __name__ == "__main__":

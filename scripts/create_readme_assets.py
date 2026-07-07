@@ -8,7 +8,7 @@ Outputs:
 
     docs/assets/workflow_overview.png
     docs/assets/synthetic_anomaly_screening.png
-    docs/assets/synthetic_map_preview.png
+    docs/assets/synthetic_monitoring_dashboard_preview.png
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from PIL import Image, ImageDraw, ImageFont
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ASSET_DIR = REPO_ROOT / "docs" / "assets"
@@ -34,7 +35,7 @@ def create_workflow_overview() -> Path:
         ("QA/QC cleaning", "timestamps, duplicates,\nmissing records, daily summaries"),
         ("Public report", "HTML + CSV summaries\nfor software review"),
         ("Optional AI", "sensor-health features\nand robust anomaly scores"),
-        ("Synthetic map", "fictional points and\npublic-safe coordinates"),
+        ("Synthetic map", "dashboard-style map\nwith fictional points"),
     ]
 
     x_positions = np.linspace(0.08, 0.92, len(steps))
@@ -122,43 +123,128 @@ def create_anomaly_plot() -> Path:
     return output
 
 
-def create_map_preview() -> Path:
+def _load_font(size: int) -> ImageFont.ImageFont:
+    for name in ("DejaVuSans.ttf", "Arial.ttf"):
+        try:
+            return ImageFont.truetype(name, size)
+        except OSError:
+            continue
+    return ImageFont.load_default()
+
+
+def _draw_panel(draw: ImageDraw.ImageDraw, xy: tuple[int, int, int, int], fill: tuple[int, int, int, int]) -> None:
+    draw.rounded_rectangle(xy, radius=8, fill=fill, outline=(185, 185, 185, 220), width=1)
+
+
+def create_dashboard_map_preview() -> Path:
     ASSET_DIR.mkdir(parents=True, exist_ok=True)
 
-    points = pd.DataFrame(
-        [
-            ("Point_001", "normal", 55.945, -3.205),
-            ("Point_002", "warning", 55.952, -3.193),
-            ("Point_003", "normal", 55.939, -3.184),
-            ("Point_004", "offline", 55.934, -3.213),
-            ("Point_005", "normal", 55.926, -3.198),
-        ],
-        columns=["point_id", "status", "latitude", "longitude"],
-    )
+    width, height = 1600, 900
+    image = Image.new("RGB", (width, height), (15, 17, 20))
+    overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
 
-    fig, ax = plt.subplots(figsize=(8, 5.2))
-    markers = {"normal": "o", "warning": "^", "offline": "s"}
-    for status, group in points.groupby("status"):
-        ax.scatter(group["longitude"], group["latitude"], s=80, marker=markers.get(status, "o"), label=status)
-        for _, row in group.iterrows():
-            ax.annotate(
-                row["point_id"],
-                (row["longitude"], row["latitude"]),
-                xytext=(5, 5),
-                textcoords="offset points",
-                fontsize=8,
-            )
+    font_panel = _load_font(18)
+    font_small = _load_font(14)
+    font_tiny = _load_font(12)
 
-    ax.set_title("Synthetic monitoring-point map preview")
-    ax.set_xlabel("Synthetic longitude")
-    ax.set_ylabel("Synthetic latitude")
-    ax.grid(True, alpha=0.3)
-    ax.legend(title="Status")
-    fig.tight_layout()
+    rng = np.random.default_rng(12)
 
-    output = ASSET_DIR / "synthetic_map_preview.png"
-    fig.savefig(output, dpi=180, bbox_inches="tight")
-    plt.close(fig)
+    # Synthetic dark basemap texture.
+    for _ in range(130):
+        x0 = int(rng.integers(0, width))
+        y0 = int(rng.integers(0, height))
+        length = int(rng.integers(90, 280))
+        angle = float(rng.uniform(0, 2 * np.pi))
+        points = []
+        for step in range(5):
+            x = x0 + int(np.cos(angle + 0.22 * step) * length * step / 5)
+            y = y0 + int(np.sin(angle + 0.18 * step) * length * step / 5)
+            points.append((x, y))
+        draw.line(points, fill=(68, 72, 78, 90), width=int(rng.integers(1, 3)))
+
+    # Fictional green boundaries, inspired by operational overlays but synthetic.
+    boundary_sets = [
+        [(455, 90), (640, 105), (720, 210), (690, 340), (545, 385), (410, 300), (455, 90)],
+        [(700, 375), (900, 320), (1060, 430), (1020, 610), (815, 645), (655, 535), (700, 375)],
+        [(215, 430), (385, 370), (540, 470), (510, 675), (320, 720), (185, 595), (215, 430)],
+        [(1080, 170), (1320, 145), (1445, 310), (1370, 505), (1150, 500), (1035, 335), (1080, 170)],
+    ]
+    for pts in boundary_sets:
+        jittered = []
+        for x, y in pts:
+            jittered.append((x + int(rng.integers(-18, 18)), y + int(rng.integers(-18, 18))))
+        draw.line(jittered, fill=(16, 170, 38, 235), width=5)
+
+    # Synthetic markers and clusters.
+    marker_data = [
+        (600, 290, "warning", "▲", "8"),
+        (665, 310, "normal", "●", "17"),
+        (710, 325, "offline", "■", "29"),
+        (760, 365, "warning", "▲", "5"),
+        (835, 395, "offline", "■", "12"),
+        (920, 465, "normal", "●", "21"),
+        (1045, 495, "warning", "▲", "6"),
+        (470, 510, "offline", "■", "3"),
+        (370, 580, "normal", "●", "2"),
+        (1220, 360, "warning", "▲", "4"),
+        (1285, 610, "offline", "■", "1"),
+        (760, 575, "normal", "●", "10"),
+        (905, 250, "normal", "●", "15"),
+        (555, 420, "offline", "■", "7"),
+    ]
+    colours = {
+        "normal": (44, 162, 95, 255),
+        "warning": (254, 178, 76, 255),
+        "offline": (222, 45, 38, 255),
+    }
+    for x, y, status, symbol, label in marker_data:
+        fill = colours[status]
+        draw.ellipse((x - 18, y - 18, x + 18, y + 18), fill=fill, outline=(255, 255, 255, 230), width=2)
+        draw.text((x - 6, y - 10), symbol, fill=(255, 255, 255, 255), font=font_tiny)
+        draw.text((x + 13, y + 9), label, fill=(235, 210, 190, 230), font=font_tiny)
+
+    # Left zoom buttons and search.
+    _draw_panel(draw, (12, 54, 44, 124), (255, 255, 255, 238))
+    draw.text((23, 59), "+", fill=(20, 20, 20, 255), font=font_panel)
+    draw.line((17, 89, 39, 89), fill=(150, 150, 150, 255), width=1)
+    draw.text((25, 91), "–", fill=(20, 20, 20, 255), font=font_panel)
+
+    _draw_panel(draw, (14, 140, 150, 178), (255, 255, 255, 238))
+    draw.text((24, 149), "ID PDM", fill=(70, 70, 70, 255), font=font_small)
+    draw.text((116, 147), "⌕", fill=(20, 20, 20, 255), font=font_panel)
+
+    # Header.
+    _draw_panel(draw, (55, 18, 560, 88), (18, 18, 18, 225))
+    draw.text((75, 28), "Synthetic urban drainage monitoring dashboard", fill=(250, 250, 250, 255), font=font_panel)
+    draw.text((75, 58), "Public-safe mock-up: fictional IDs, synthetic coordinates and QA/QC flags.", fill=(210, 210, 210, 255), font=font_small)
+
+    # Right control panel.
+    _draw_panel(draw, (1340, 56, 1580, 845), (255, 255, 255, 238))
+    draw.text((1360, 76), "Layers and QA/QC filters", fill=(25, 25, 25, 255), font=font_panel)
+
+    y = 120
+    sections = [
+        ("Base map", ["● cartodb dark matter", "○ openstreetmap"]),
+        ("Overlay", ["☑ Synthetic regions", "☑ Cluster points"]),
+        ("Status", ["☑ Normal", "☑ Warning", "☑ Offline", "☑ Maintenance"]),
+        ("QA/QC flags", ["☑ Data delayed", "☑ Battery warning", "☑ Low level", "☑ High flow", "☑ Dirty sensor", "☑ Missing data"]),
+    ]
+    for title, items in sections:
+        draw.text((1360, y), title, fill=(25, 25, 25, 255), font=font_small)
+        y += 25
+        for item in items:
+            draw.text((1370, y), item, fill=(45, 45, 45, 255), font=font_tiny)
+            y += 24
+        y += 10
+
+    # Attribution-like footer.
+    draw.rectangle((1120, 868, 1585, 895), fill=(250, 250, 250, 220))
+    draw.text((1132, 873), "Synthetic preview | Inspired by Leaflet dashboards | No real operational data", fill=(20, 80, 120, 255), font=font_tiny)
+
+    image = Image.alpha_composite(image.convert("RGBA"), overlay).convert("RGB")
+    output = ASSET_DIR / "synthetic_monitoring_dashboard_preview.png"
+    image.save(output)
     return output
 
 
@@ -166,7 +252,7 @@ def main() -> None:
     outputs = [
         create_workflow_overview(),
         create_anomaly_plot(),
-        create_map_preview(),
+        create_dashboard_map_preview(),
     ]
 
     for output in outputs:
