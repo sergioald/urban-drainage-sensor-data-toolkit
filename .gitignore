@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Local data and outputs
+data/
+outputs/
+examples/outputs/
+*.log
+*.tmp
+
+# Credentials and private configuration
+.env
+*.env
+*token*.pickle
+*credentials*.json
+*client_secret*.json
+*.key
+*.pem
+
+# Large/generated files from the legacy environment
+*.exe
+*.bak
+*.dat
+*.dir
+
+# Private validation/audit folders
+PRIVATE_SAMPLE_FOR_CHAT/
+PRIVATE_SAMPLE_FOR_VALIDATION/
+PRIVATE_SAMPLE_FOR_VALIDATION.zip
+private_audit/
+private_report/
+*_private_audit.csv
+*_private_report.csv
+
+# Full private PVS operational folders
+/INPUT/
+/DATA/
+/REPORT/
+/OUTPUT/
+/PRIVATE_SAMPLE_FOR_REVIEW/
+/PRIVATE_SAMPLE_FOR_REVIEW.zip
+/PVS_PRIVATE_SAMPLE_FOR_REVIEW/
+/PVS_PRIVATE_SAMPLE_FOR_REVIEW.zip
+
+# Private INPUT subfolders if copied manually
+INPUT/FILE/
+INPUT/TEMP/
+INPUT/TOPO/

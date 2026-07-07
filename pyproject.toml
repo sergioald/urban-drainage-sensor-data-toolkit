@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urban-drainage-sensor-data-toolkit"
+version = "0.3.0"
+description = "Public-safe urban drainage telemetry CSV QA/QC and reporting toolkit converted from legacy monitoring scripts."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Sergio Lopez Dubon"}]
+keywords = ["urban-drainage", "sensor-data", "qaqc", "time-series", "hydrology", "research-software"]
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "tabulate>=0.9",
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+legacy = [
+    "matplotlib",
+    "scipy",
+    "scikit-learn",
+    "joblib",
+    "openpyxl",
+    "python-docx",
+    "folium",
+    "selenium",
+    "psycopg2-binary",
+    "PyYAML",
+]
+
+[project.scripts]
+urban-drainage-qaqc = "urban_drainage_sensor_toolkit.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+exclude = [
+    "legacy_scripts/raw",
+    "legacy_scripts/config",
+    "examples/outputs",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
