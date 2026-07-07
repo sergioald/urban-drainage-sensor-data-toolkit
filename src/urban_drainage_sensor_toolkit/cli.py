@@ -5,6 +5,7 @@ from pathlib import Path
 
 from .audit import write_audit_report
 from .maps import create_synthetic_monitoring_points, render_leaflet_map
+from .network_report import run_synthetic_network_demo
 from .reporting import run_folder_report
 from .synthetic import create_synthetic_monitoring_csv
 
@@ -59,6 +60,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Output folder for synthetic map files",
     )
 
+    network_demo = sub.add_parser(
+        "network-demo",
+        help="Run the synthetic multi-sensor urban drainage network demo",
+    )
+    network_demo.add_argument(
+        "--output",
+        default="examples/outputs/network_demo",
+        help="Output folder for the synthetic network demo",
+    )
+    network_demo.add_argument(
+        "--periods",
+        type=int,
+        default=336,
+        help="Number of synthetic records per telemetry series",
+    )
+
     return parser
 
 
@@ -101,6 +118,12 @@ def main(argv: list[str] | None = None) -> int:
         generated = _run_map_demo(args.output)
         print(f"Synthetic point table written to {generated['csv']}")
         print(f"Synthetic dashboard map written to {generated['html']}")
+        return 0
+
+    if args.command == "network-demo":
+        generated = run_synthetic_network_demo(args.output, periods=args.periods)
+        print(f"Network report written to {generated['report_html']}")
+        print(f"Synthetic dashboard map written to {generated['synthetic_map_html']}")
         return 0
 
     if args.command == "audit":
