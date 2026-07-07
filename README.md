@@ -11,8 +11,22 @@ The project demonstrates how private operational monitoring workflows can be con
 
 For a short explanation of the private-to-public conversion strategy and engineering workflow, see [docs/case_study.md](docs/case_study.md).
 
+Live-demo scope and deployment notes are available in [docs/live_demo.md](docs/live_demo.md).
+
 > **Status:** prototype / repository conversion.  
 > The package is suitable for public demonstration and software review. It is not a drop-in replacement for the original operational system.
+
+## Live demo
+
+A browser-based synthetic demo can be deployed from `app.py` using Streamlit Community Cloud.
+
+The demo runs the public-safe synthetic network workflow: rainfall-event detection, level/flow response summaries, status-rule checks, report outputs, and a synthetic dashboard map.
+
+```bash
+streamlit run app.py
+```
+
+See [docs/live_demo.md](docs/live_demo.md) for scope and interpretation notes.
 
 ---
 

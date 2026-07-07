@@ -15,7 +15,6 @@ if str(SRC) not in sys.path:
 
 from urban_drainage_sensor_toolkit.network_report import run_synthetic_network_demo  # noqa: E402
 
-
 st.set_page_config(
     page_title="Urban Drainage Sensor QA/QC Demo",
     page_icon="🌧️",
