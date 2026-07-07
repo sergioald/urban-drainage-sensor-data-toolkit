@@ -1,16 +1,43 @@
 # Urban Drainage Sensor Data Toolkit
 
-![Tests](https://img.shields.io/badge/tests-pytest-informational)
+![Tests](https://github.com/sergioald/urban-drainage-sensor-data-toolkit/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-informational?logo=python)
 ![Status](https://img.shields.io/badge/status-public--safe%20prototype-orange)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 
-Public-safe Python toolkit for urban drainage and water-network telemetry QA/QC, automated reporting, and optional applied-AI anomaly screening.
+Public-safe Python toolkit for **urban drainage and water-network telemetry QA/QC**, automated reporting, synthetic monitoring examples, and optional applied-AI anomaly screening.
 
-The repository demonstrates how private operational monitoring workflows can be converted into a clean research-software package using synthetic examples, tests, documentation, and strict publication boundaries.
+The project demonstrates how private operational monitoring workflows can be converted into a clean research-software package using synthetic examples, tests, documentation, and strict publication boundaries.
 
-> Status: prototype / repository conversion.  
+> **Status:** prototype / repository conversion.  
 > The package is suitable for public demonstration and software review. It is not a drop-in replacement for the original operational system.
+
+---
+
+## Why this repository matters
+
+Urban drainage monitoring systems often combine telemetry from remote devices, FTP folders, SCADA-style exports, rainfall gauges, configuration tables, and field metadata. Before those data can support reporting, decision-making, or machine learning, they need reliable QA/QC.
+
+This repository provides a public-safe version of that workflow. It focuses on:
+
+- timestamp parsing and cleaning
+- duplicate record detection
+- missing-data and last-contact checks
+- daily summaries and static HTML/CSV reports
+- private-folder auditing without publishing row values
+- synthetic monitoring data for public demonstrations
+- optional sensor-health anomaly screening
+- synthetic monitoring-point map generation
+
+This project complements my wider portfolio on engineering monitoring systems, sensor-data QA/QC, anomaly detection, and public-safe research software.
+
+---
+
+## Visual overview
+
+![Urban drainage QA/QC workflow](docs/assets/workflow_overview.png)
+
+The public workflow starts from synthetic telemetry, applies QA/QC checks, writes static reports, and optionally produces anomaly-screening and map outputs.
 
 ---
 
@@ -20,9 +47,27 @@ The repository demonstrates how private operational monitoring workflows can be 
 |---|---|
 | Engineering data QA/QC | Timestamp parsing, duplicate handling, missing-row estimates, digital-event forward filling, mixed-folder audits |
 | Urban hydrology monitoring | Flow, level, velocity, rainfall, battery, and last-contact style telemetry checks |
-| Research software | `src/` package structure, CLI, tests, docs, examples, and clear limitations |
-| Public-safe release | Synthetic data and private-data guidance instead of real monitoring records |
+| Automated reporting | Static HTML and CSV summaries from synthetic telemetry |
+| Public-safe release | Synthetic data and private-data guidance instead of real operational records |
 | Optional applied AI | Explainable sensor-health features and robust anomaly scoring on synthetic telemetry |
+| Synthetic map output | Fictional monitoring-point map with synthetic coordinates only |
+| Research software | `src/` package structure, CLI, tests, CI, docs, examples, and limitations |
+
+---
+
+## Example visual outputs
+
+### Applied-AI anomaly screening
+
+![Synthetic anomaly-screening output](docs/assets/synthetic_anomaly_screening.png)
+
+The anomaly-screening example uses synthetic telemetry and an explainable robust baseline. It is included as a transparent demonstration, not as a validated production ML model.
+
+### Synthetic monitoring-point map
+
+![Synthetic monitoring-point map preview](docs/assets/synthetic_map_preview.png)
+
+The map example uses fictional point IDs and synthetic coordinates only. Do not commit real coordinates, client names, project names, or operational asset IDs.
 
 ---
 
@@ -32,13 +77,78 @@ The repository demonstrates how private operational monitoring workflows can be 
 Private telemetry structure
         │
         ├── local private audit, never committed
-        ├── schema/quality checks
+        ├── schema and data-quality checks
         └── reusable public-safe utilities
                 ↓
-Synthetic telemetry CSVs → cleaning/QA/QC → daily summaries → CSV + HTML report
-                ↓
-Optional sensor-health features → robust anomaly scores → diagnostic plot
+Synthetic telemetry CSVs
+        ↓
+cleaning / QA/QC
+        ↓
+daily summaries + static HTML/CSV report
+        ↓
+optional sensor-health features + anomaly scores
+        ↓
+synthetic monitoring-point map
 ```
+
+---
+
+## Example outputs
+
+The repository uses synthetic data only. The examples are designed to show the workflow without exposing real sites, coordinates, client names, or operational identifiers.
+
+### 1. QA/QC report
+
+Run:
+
+```bash
+urban-drainage-qaqc demo
+```
+
+Expected output:
+
+```text
+examples/outputs/demo/report/report.html
+examples/outputs/demo/report/summary.csv
+```
+
+The report summarises synthetic telemetry files, cleaned records, duplicate timestamps, missing-row estimates, time coverage, and daily QA/QC summaries.
+
+### 2. Applied-AI anomaly-screening demo
+
+Run:
+
+```bash
+python examples/ml/run_anomaly_demo.py
+```
+
+Expected output:
+
+```text
+examples/outputs/ml_anomaly_demo/
+├── anomaly_plot.png
+├── anomaly_scores.csv
+├── anomaly_summary.csv
+└── sensor_health_features.csv
+```
+
+### 3. Synthetic monitoring-point map
+
+Run:
+
+```bash
+python examples/maps/create_synthetic_map.py
+```
+
+Expected output:
+
+```text
+examples/outputs/synthetic_map/
+├── synthetic_monitoring_points.csv
+└── synthetic_monitoring_points.html
+```
+
+Open the HTML file locally in a browser to view the public-safe Leaflet map. The map uses fictional point IDs and synthetic coordinates only.
 
 ---
 
@@ -53,7 +163,7 @@ python -m pip install -e ".[dev]"
 python -m pytest -q
 ```
 
-Run the public demo:
+Run the public QA/QC demo:
 
 ```powershell
 urban-drainage-qaqc demo
@@ -62,14 +172,26 @@ urban-drainage-qaqc demo
 Run the optional applied-AI demo:
 
 ```powershell
-python examples/ml/run_anomaly_demo.py
+python examples\ml\run_anomaly_demo.py
+```
+
+Run the synthetic map demo:
+
+```powershell
+python examples\maps\create_synthetic_map.py
+```
+
+Run code quality checks:
+
+```powershell
+ruff check .
 ```
 
 ---
 
 ## Command-line usage
 
-Create synthetic data:
+Create synthetic telemetry:
 
 ```bash
 urban-drainage-qaqc create-synthetic --output examples/data/synthetic_monitoring_point.csv
@@ -93,59 +215,89 @@ Keep private audit outputs outside Git or in ignored folders.
 
 ## Optional applied-AI extension
 
-The toolkit includes a lightweight applied-AI example for sensor-health screening. It uses synthetic telemetry only and demonstrates transparent anomaly scoring for:
+The applied-AI component is intentionally lightweight and transparent. It is included to show how cleaned telemetry can be converted into basic sensor-health features and screened for anomalous behaviour.
 
-- missing data
-- spikes
-- flat-line behaviour
-- signal-quality degradation
-- basic sensor-health drift
+It demonstrates:
 
-Run it with:
+- missing-data indicators
+- rolling mean and rolling standard deviation
+- rate-of-change features
+- spike screening
+- flat-line detection
+- robust anomaly scoring
+- compact sensor-health summaries
+
+The default method is an explainable robust baseline, not a validated production ML model. It uses synthetic telemetry only.
+
+Run:
 
 ```bash
 python examples/ml/run_anomaly_demo.py
 ```
 
-The example writes anomaly scores, a compact health summary, and a diagnostic plot to:
+---
 
-```text
-examples/outputs/ml_anomaly_demo/
+## Synthetic map example
+
+The original private workflow produced map-style outputs for monitoring points. The public repository does **not** include real point maps because those can expose coordinates, client names, project identifiers, and asset IDs.
+
+The synthetic map example demonstrates the same output family safely:
+
+```bash
+python examples/maps/create_synthetic_map.py
 ```
 
-This is intentionally presented as an explainable baseline, not as a validated production ML model.
+Outputs:
+
+```text
+examples/outputs/synthetic_map/
+├── synthetic_monitoring_points.csv
+└── synthetic_monitoring_points.html
+```
+
+Public-safety rule: only synthetic or anonymised points should be used in public examples.
 
 ---
 
-## Repository structure
+## What is included
 
 ```text
-.
-├── .github/workflows/          # CI checks
-├── docs/                       # Public documentation
-├── examples/                   # Synthetic data and demos
-├── scripts/                    # Helper scripts
-├── src/urban_drainage_sensor_toolkit/
-│   ├── cli.py                  # Command-line interface
-│   ├── io.py                   # Input/output helpers
-│   ├── cleaning.py             # Cleaning and timestamp handling
-│   ├── audit.py                # Private-folder audit helpers
-│   ├── reporting.py            # Report generation
-│   └── ml/                     # Optional sensor-health anomaly screening
-├── tests/                      # Public tests
-├── tools/                      # Private sampling helpers
-├── pyproject.toml
-├── README.md
-└── GITHUB_CREATE_REPO_ANACONDA_GUIDE.md
+src/urban_drainage_sensor_toolkit/
+├── audit.py          # private-folder audit helpers
+├── cli.py            # command-line interface
+├── core.py           # core cleaning and QA/QC functions
+├── io_utils.py       # input/output helpers
+├── maps.py           # public-safe synthetic map generation
+├── reporting.py      # HTML/CSV report generation
+├── synthetic.py      # synthetic telemetry generation
+└── ml/               # optional applied-AI anomaly screening
+```
+
+Other important folders:
+
+```text
+.github/workflows/    # CI checks
+docs/                 # public documentation
+examples/             # synthetic data and demos
+scripts/              # helper scripts
+tests/                # automated tests
+tools/                # private sampling helpers
 ```
 
 ---
 
-## Private-data boundary
+## What is not included
 
-Do not commit private operational folders, private samples, credentials, tokens, pickles, maps with real coordinates, or generated private reports.
+This public repository intentionally excludes:
 
-The `.gitignore` is intentionally strict and excludes common private/local artefacts such as:
+- original operational telemetry
+- real `INPUT/`, `DATA/`, `REPORT/`, or `OUTPUT/` folders
+- private samples
+- credentials, tokens, pickles, and local configuration files
+- real maps, coordinates, client names, project names, or asset identifiers
+- generated private reports
+
+The `.gitignore` is intentionally strict and excludes common private/local artefacts:
 
 ```text
 INPUT/
@@ -165,12 +317,49 @@ TEMP/
 
 ---
 
+## Validation
+
+Local validation used during the public-clean release:
+
+```bash
+python -m pytest -q
+urban-drainage-qaqc demo
+python examples/ml/run_anomaly_demo.py
+python examples/maps/create_synthetic_map.py
+ruff check .
+```
+
+Expected result:
+
+```text
+tests pass
+demo report generated
+anomaly-screening outputs generated
+synthetic map generated
+ruff passes
+```
+
+---
+
 ## Limitations
 
 - The public examples are synthetic.
 - The applied-AI demo is an explainable baseline, not a validated production model.
+- The map example uses fictional coordinates only.
 - Private operational data should remain outside Git.
 - Local private audit results should be reviewed before sharing.
+- This repository demonstrates a public-safe workflow conversion, not a full operational replacement.
+
+---
+
+## Suggested citation / attribution
+
+If you use this repository as a reference for public-safe engineering telemetry workflows, please cite the repository URL:
+
+```text
+Sergio Lopez Dubon, Urban Drainage Sensor Data Toolkit, GitHub repository.
+https://github.com/sergioald/urban-drainage-sensor-data-toolkit
+```
 
 ---
 
