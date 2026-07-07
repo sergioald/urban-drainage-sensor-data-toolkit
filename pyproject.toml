@@ -23,18 +23,6 @@ dev = [
     "pytest>=8",
     "ruff>=0.6",
 ]
-legacy = [
-    "matplotlib",
-    "scipy",
-    "scikit-learn",
-    "joblib",
-    "openpyxl",
-    "python-docx",
-    "folium",
-    "selenium",
-    "psycopg2-binary",
-    "PyYAML",
-]
 
 [project.scripts]
 urban-drainage-qaqc = "urban_drainage_sensor_toolkit.cli:main"
