@@ -32,6 +32,9 @@ _FLAG_COLUMNS = [
     "missing_data",
 ]
 
+_TRUE_TOKENS = {"1", "true", "yes", "y", "si", "s", "on"}
+_FALSE_TOKENS = {"0", "false", "no", "n", "none", "nan", "na", "", "off"}
+
 
 def create_synthetic_monitoring_points() -> pd.DataFrame:
     """Create public-safe synthetic monitoring points.
@@ -130,6 +133,22 @@ def _status_style(status: object) -> dict[str, str]:
     )
 
 
+def _coerce_bool(value: object) -> bool:
+    """Convert common CSV boolean encodings without treating 'False' as True."""
+
+    if isinstance(value, bool):
+        return value
+    if value is None or pd.isna(value):
+        return False
+
+    token = str(value).strip().lower()
+    if token in _TRUE_TOKENS:
+        return True
+    if token in _FALSE_TOKENS:
+        return False
+    return False
+
+
 def _serialise_points(
     points: pd.DataFrame,
     *,
@@ -145,7 +164,7 @@ def _serialise_points(
         style = _status_style(status)
 
         flags = {
-            col: bool(row.get(col, False))
+            col: _coerce_bool(row.get(col, False))
             for col in _FLAG_COLUMNS
             if col in points.columns
         }

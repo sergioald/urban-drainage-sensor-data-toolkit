@@ -19,27 +19,13 @@ SRC = REPO_ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from urban_drainage_sensor_toolkit.maps import (  # noqa: E402
-    create_synthetic_monitoring_points,
-    render_leaflet_map,
-)
+from urban_drainage_sensor_toolkit.cli import _run_map_demo  # noqa: E402
 
 
 def main() -> None:
-    output_dir = REPO_ROOT / "examples" / "outputs" / "synthetic_map"
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    points = create_synthetic_monitoring_points()
-    points.to_csv(output_dir / "synthetic_monitoring_points.csv", index=False)
-
-    output_html = render_leaflet_map(
-        points,
-        output_dir / "synthetic_monitoring_points.html",
-        title="Synthetic urban drainage monitoring dashboard",
-    )
-
-    print(f"Synthetic point table written to: {output_dir / 'synthetic_monitoring_points.csv'}")
-    print(f"Synthetic dashboard map written to: {output_html}")
+    generated = _run_map_demo(REPO_ROOT / "examples" / "outputs" / "synthetic_map")
+    print(f"Synthetic point table written to: {generated['csv']}")
+    print(f"Synthetic dashboard map written to: {generated['html']}")
 
 
 if __name__ == "__main__":
