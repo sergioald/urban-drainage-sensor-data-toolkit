@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 from .audit import audit_csv_file, find_csv_files
 from .core import clean_timeseries, daily_aggregate, dataframe_profile, summarize_measurement_point
@@ -102,8 +104,11 @@ def run_folder_report(
     summary_df.to_csv(summary_csv, index=False)
     generated["summary_csv"] = summary_csv
 
+    report_summary_plot = _write_report_summary_plot(summary_df, output_folder)
+    generated["report_summary_plot"] = report_summary_plot
+
     html_path = output_folder / "report.html"
-    html = _build_html_report(summary_df, inventory_df)
+    html = _build_html_report(summary_df, inventory_df, report_summary_plot=report_summary_plot.name)
     html_path.write_text(html, encoding="utf-8")
     generated["html_report"] = html_path
     return generated
@@ -116,7 +121,78 @@ def _safe_output_stem(relative_path: Path) -> str:
     return stem
 
 
-def _build_html_report(summary_df: pd.DataFrame, inventory_df: pd.DataFrame) -> str:
+def _status_bucket(status: object) -> str:
+    text = str(status).lower()
+    if text.startswith("processed"):
+        return "processed"
+    if text.startswith("skipped"):
+        return "skipped"
+    if text.startswith("failed"):
+        return "failed"
+    return "other"
+
+
+def _numeric_column(df: pd.DataFrame, column: str) -> pd.Series:
+    if column not in df:
+        return pd.Series(dtype=float)
+    return pd.to_numeric(df[column], errors="coerce").fillna(0)
+
+
+def _write_report_summary_plot(summary_df: pd.DataFrame, output_folder: Path) -> Path:
+    """Write one public-safe PNG plot summarising the QA/QC report.
+
+    This uses Matplotlib's Agg canvas directly, so it does not require Tk or any
+    desktop GUI backend in conda or CI environments.
+    """
+
+    output_path = output_folder / "report_summary.png"
+
+    if summary_df.empty:
+        metrics = pd.Series({"processed files": 0, "skipped files": 0, "failed files": 0})
+    else:
+        status_bucket = (
+            summary_df["status"].map(_status_bucket)
+            if "status" in summary_df
+            else pd.Series(dtype=str)
+        )
+        metrics = pd.Series(
+            {
+                "processed files": int((status_bucket == "processed").sum()),
+                "skipped files": int((status_bucket == "skipped").sum()),
+                "failed files": int((status_bucket == "failed").sum()),
+                "duplicate timestamps": int(_numeric_column(summary_df, "duplicate_timestamps").sum()),
+                "missing rows estimate": int(_numeric_column(summary_df, "missing_rows_estimate").sum()),
+            }
+        )
+
+    fig = Figure(figsize=(8.5, 4.8))
+    FigureCanvas(fig)
+    ax = fig.subplots()
+
+    ordered = metrics.sort_values()
+    positions = range(len(ordered))
+    ax.barh(list(positions), ordered.to_numpy())
+    ax.set_yticks(list(positions), labels=list(ordered.index))
+    ax.set_title("Synthetic QA/QC report summary")
+    ax.set_xlabel("Count")
+    ax.set_ylabel("")
+    ax.grid(axis="x", alpha=0.3)
+
+    max_value = max(float(ordered.max()), 1.0)
+    for i, value in enumerate(ordered.to_numpy()):
+        ax.text(float(value) + max_value * 0.02, i, f"{int(value)}", va="center", fontsize=9)
+
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=180, bbox_inches="tight")
+    return output_path
+
+
+def _build_html_report(
+    summary_df: pd.DataFrame,
+    inventory_df: pd.DataFrame,
+    *,
+    report_summary_plot: str | None = None,
+) -> str:
     summary_table = (
         summary_df.to_html(index=False, escape=True) if not summary_df.empty else "<p>No CSV files found.</p>"
     )
@@ -125,6 +201,11 @@ def _build_html_report(summary_df: pd.DataFrame, inventory_df: pd.DataFrame) -> 
         .to_html(index=False, escape=True)
         if not inventory_df.empty
         else "<p>No CSV files found.</p>"
+    )
+    plot_html = (
+        f'<h2>Report summary plot</h2><img src="{report_summary_plot}" alt="QA/QC report summary plot">'
+        if report_summary_plot
+        else ""
     )
     return f"""<!doctype html>
 <html lang=\"en\">
@@ -136,12 +217,14 @@ body {{ font-family: Arial, sans-serif; max-width: 1100px; margin: 2rem auto; li
 table {{ border-collapse: collapse; width: 100%; font-size: 0.9rem; margin-bottom: 2rem; }}
 th, td {{ border: 1px solid #ddd; padding: 0.4rem; text-align: left; vertical-align: top; }}
 th {{ background: #f3f3f3; }}
+img {{ max-width: 100%; border: 1px solid #ddd; margin-bottom: 2rem; }}
 .note {{ background: #fff8dc; border: 1px solid #eedc82; padding: 0.8rem; }}
 </style>
 </head>
 <body>
 <h1>Urban drainage telemetry QA/QC report</h1>
 <p class=\"note\">Public-safe demonstration report. It checks CSV structure, timestamps, duplicate records, digital-event columns, and simple daily aggregates. It does not replace engineering review. Original operational files should stay private.</p>
+{plot_html}
 <h2>Time-series summary</h2>
 {summary_table}
 <h2>File inventory</h2>

@@ -38,3 +38,16 @@ def test_render_leaflet_map_writes_dashboard_html(tmp_path: Path):
     assert "PDM_001" in text
     assert "CLIENTE" not in text
     assert "COMMESSA" not in text
+
+
+def test_boolean_string_flags_are_coerced_correctly(tmp_path: Path):
+    points = create_synthetic_monitoring_points().head(2).copy()
+    points["data_delayed"] = points["data_delayed"].astype(object)
+    points.loc[0, "data_delayed"] = "False"
+    points.loc[1, "data_delayed"] = "True"
+
+    output_html = render_leaflet_map(points, tmp_path / "map.html")
+    text = output_html.read_text(encoding="utf-8")
+
+    assert '"data_delayed": false' in text
+    assert '"data_delayed": true' in text
