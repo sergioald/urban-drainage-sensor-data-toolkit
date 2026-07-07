@@ -18,9 +18,13 @@ Live-demo scope and deployment notes are available in [docs/live_demo.md](docs/l
 
 ## Live demo
 
-A browser-based synthetic demo can be deployed from `app.py` using Streamlit Community Cloud.
+Try the synthetic urban drainage monitoring demo online:
 
-The demo runs the public-safe synthetic network workflow: rainfall-event detection, level/flow response summaries, status-rule checks, report outputs, and a synthetic dashboard map.
+[Open the live Streamlit demo](https://urban-drainage-sensor-data-toolkit.streamlit.app/)
+
+The demo uses synthetic data only and shows rainfall-event detection, level/flow response summaries, status-rule checks, report outputs, and a synthetic dashboard map.
+
+To run it locally:
 
 ```bash
 streamlit run app.py

@@ -1,5 +1,9 @@
 # Live demo
 
+## Live app
+
+[Open the live Streamlit demo](https://urban-drainage-sensor-data-toolkit.streamlit.app/)
+
 This repository includes a lightweight Streamlit demo for the synthetic urban drainage monitoring workflow.
 
 The demo is intended for recruiters, collaborators, and reviewers who want to understand the project without cloning the repository or setting up a local Python environment.
