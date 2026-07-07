@@ -254,6 +254,7 @@ Run the synthetic network demo:
 
 ```bash
 urban-drainage-qaqc network-demo
+```
 
 Keep private audit outputs outside Git or in ignored folders.
 
@@ -320,7 +321,7 @@ src/urban_drainage_sensor_toolkit/
 ├── reporting.py      # HTML/CSV report and plot generation
 ├── status_rules.py   # stale-data, battery, flatline, level and flow checks
 ├── synthetic.py      # synthetic telemetry generation
-├── synthetic_network.py # synthetic multi-sensor network generation      # synthetic telemetry generation
+├── synthetic_network.py # synthetic multi-sensor network generation
 └── ml/               # optional applied-AI anomaly screening
 ```
 
@@ -377,6 +378,7 @@ python -m pytest -q
 urban-drainage-qaqc demo
 python examples/ml/run_anomaly_demo.py
 urban-drainage-qaqc map-demo
+urban-drainage-qaqc network-demo
 ruff check .
 ```
 
@@ -387,6 +389,7 @@ tests pass
 demo report generated
 anomaly-screening outputs generated
 synthetic map generated
+synthetic network demo generated
 ruff passes
 ```
 
