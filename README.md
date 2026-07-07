@@ -393,6 +393,8 @@ synthetic network demo generated
 ruff passes
 ```
 
+Validation scope and interpretation notes are summarised in [docs/validation_notes.md](docs/validation_notes.md).
+
 ---
 
 ## Limitations
