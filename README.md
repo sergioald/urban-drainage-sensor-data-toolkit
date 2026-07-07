@@ -9,6 +9,8 @@ Public-safe Python toolkit for **urban drainage and water-network telemetry QA/Q
 
 The project demonstrates how private operational monitoring workflows can be converted into a clean research-software package using synthetic examples, tests, documentation, and strict publication boundaries.
 
+For a short explanation of the private-to-public conversion strategy and engineering workflow, see [docs/case_study.md](docs/case_study.md).
+
 > **Status:** prototype / repository conversion.  
 > The package is suitable for public demonstration and software review. It is not a drop-in replacement for the original operational system.
 
@@ -27,7 +29,7 @@ This repository provides a public-safe version of that workflow. It focuses on:
 - private-folder auditing without publishing row values
 - synthetic monitoring data for public demonstrations
 - optional sensor-health anomaly screening
-- synthetic monitoring-point map generation
+- synthetic monitoring-point map / synthetic network demo generation
 
 This project complements my wider portfolio on engineering monitoring systems, sensor-data QA/QC, anomaly detection, and public-safe research software.
 
@@ -46,8 +48,8 @@ The public workflow starts from synthetic telemetry, applies QA/QC checks, write
 | Area | What is demonstrated |
 |---|---|
 | Engineering data QA/QC | Timestamp parsing, duplicate handling, missing-row estimates, digital-event forward filling, mixed-folder audits |
-| Urban hydrology monitoring | Flow, level, velocity, rainfall, battery, and last-contact style telemetry checks |
-| Automated reporting | Static HTML, CSV summaries, and report-summary plots from synthetic telemetry |
+| Urban hydrology monitoring | Flow, level, velocity, rainfall, battery, last-contact checks, event detection, and response summaries |
+| Automated reporting | Static HTML, CSV summaries, report-summary plots, and synthetic network reports |
 | Public-safe release | Synthetic data and private-data guidance instead of real operational records |
 | Optional applied AI | Explainable sensor-health features and robust anomaly scoring on synthetic telemetry |
 | Synthetic map output | Dashboard-style monitoring map with fictional points and synthetic coordinates only |
@@ -88,7 +90,7 @@ daily summaries + static HTML/CSV report
         ↓
 optional sensor-health features + anomaly scores
         ↓
-synthetic monitoring-point map
+synthetic monitoring-point map / synthetic network demo
 ```
 
 ---
@@ -153,6 +155,36 @@ examples/outputs/synthetic_map/
 
 Open the HTML file locally in a browser to view the public-safe Leaflet map. The map uses fictional point IDs and synthetic coordinates only.
 
+### 4. Synthetic multi-sensor network demo
+
+Run:
+
+```bash
+urban-drainage-qaqc network-demo
+```
+
+Expected output:
+
+```text
+examples/outputs/network_demo/
+├── report.html
+├── network_summary.csv
+├── event_summary.csv
+├── sensor_response_summary.csv
+├── status_summary.csv
+├── rainfall_level_flow.png
+├── synthetic_monitoring_points.html
+└── data/
+    ├── rain_gauge_001.csv
+    ├── level_sensor_001.csv
+    ├── level_sensor_002.csv
+    ├── flow_sensor_001.csv
+    ├── battery_status.csv
+    └── monitoring_points.csv
+```
+
+The network demo shows the end-to-end public workflow: synthetic rainfall and sensor telemetry, event detection, hydraulic response summaries, status-rule checks, report generation, and a dashboard-style map.
+
 ---
 
 ## Quick start with Anaconda
@@ -184,6 +216,12 @@ Run the synthetic map demo:
 urban-drainage-qaqc map-demo
 ```
 
+Run the synthetic network demo:
+
+```powershell
+urban-drainage-qaqc network-demo
+```
+
 Run code quality checks:
 
 ```powershell
@@ -211,6 +249,11 @@ Audit a private local folder without publishing row values:
 ```bash
 urban-drainage-qaqc audit --input "path/to/private/folder" --output "private_audit"
 ```
+
+Run the synthetic network demo:
+
+```bash
+urban-drainage-qaqc network-demo
 
 Keep private audit outputs outside Git or in ignored folders.
 
@@ -270,10 +313,14 @@ src/urban_drainage_sensor_toolkit/
 ├── cli.py            # command-line interface
 ├── core.py           # core cleaning and QA/QC functions
 ├── io_utils.py       # input/output helpers
+├── events.py         # rainfall-event detection and response joins
+├── hydrology.py      # simple hydraulic-response metrics
 ├── maps.py           # public-safe synthetic map generation
+├── network_report.py # synthetic network report generation
 ├── reporting.py      # HTML/CSV report and plot generation
 ├── status_rules.py   # stale-data, battery, flatline, level and flow checks
 ├── synthetic.py      # synthetic telemetry generation
+├── synthetic_network.py # synthetic multi-sensor network generation      # synthetic telemetry generation
 └── ml/               # optional applied-AI anomaly screening
 ```
 
